@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameEvents } from '../events/game.event';
 import { Game } from '../types/game.type';
+import { ResponseCreateGame } from '../types/response-create-game.interface';
 
 @Injectable()
 export class GameService {
@@ -10,7 +11,7 @@ export class GameService {
 
   constructor(private eventEmitter: EventEmitter2) {}
 
-  createGame(gameName: string) {
+  createGame(gameName: string): ResponseCreateGame {
     const gameUuid = uuidv4();
     this.games[gameUuid] = { name: gameName, users: {} };
     return { gameUuid };
