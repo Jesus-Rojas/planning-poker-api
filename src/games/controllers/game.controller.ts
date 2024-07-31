@@ -1,4 +1,11 @@
-import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { CreateGameDto } from '../dtos/create-game.dto';
 import { GameService } from '../services/game.service';
 import { JoinGameDto } from '../dtos/join-game.dto';
@@ -12,11 +19,25 @@ export class GameController {
     return this.gameService.createGame(createGameDto.name);
   }
 
-  @Post(':gameUuid/join')
+  @Post('join/:gameUuid')
   joinGame(
     @Param('gameUuid', ParseUUIDPipe) gameUuid: string,
     @Body() joinGameDto: JoinGameDto,
   ) {
-    return this.gameService.joinGame(gameUuid, joinGameDto.name);
+    const { name, displayMode } = joinGameDto;
+    return this.gameService.joinGame(gameUuid, name, displayMode);
+  }
+
+  @Get(':gameUuid/users/:userUuid')
+  getUser(
+    @Param('gameUuid', ParseUUIDPipe) gameUuid: string,
+    @Param('userUuid', ParseUUIDPipe) userUuid: string,
+  ) {
+    return this.gameService.getUser(gameUuid, userUuid);
+  }
+
+  @Get(':gameUuid')
+  getGame(@Param('gameUuid', ParseUUIDPipe) gameUuid: string) {
+    return this.gameService.getGame(gameUuid);
   }
 }
