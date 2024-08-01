@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameEvents } from '../events/game.event';
-import { Game } from '../types/game.type';
+import { Game } from '../types/game.interface';
 import { ResponseCreateGame } from '../types/response-create-game.interface';
 import { RoleEnum } from '../types/role.enum';
 import { DisplayModeEnum } from '../types/display-mode.enum';
+import { GameStatusEnum } from '../types/game-status.enum';
 
 @Injectable()
 export class GameService {
@@ -15,7 +16,11 @@ export class GameService {
 
   createGame(gameName: string): ResponseCreateGame {
     const gameUuid = uuidv4();
-    this.games[gameUuid] = { name: gameName, users: [] };
+    this.games[gameUuid] = {
+      name: gameName,
+      users: [],
+      status: GameStatusEnum.Reveal,
+    };
     return { gameUuid };
   }
 
@@ -59,5 +64,28 @@ export class GameService {
     const user = game.users.find((user) => user.uuid === userUuid);
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  updateUserCardSelected(
+    gameUuid: string,
+    userUuid: string,
+    cardSelected: string,
+  ) {
+    this.getUser(gameUuid, userUuid);
+    this.games[gameUuid].users = this.games[gameUuid].users.map((user) => {
+      if (user.uuid === userUuid) user.cardSelected = cardSelected;
+      return user;
+    });
+  }
+
+  updateGameStatus(gameUuid: string, status: GameStatusEnum) {
+    this.getGame(gameUuid);
+    this.games[gameUuid].status = status;
+    if (status === GameStatusEnum.Loading) {
+      setTimeout(
+        () => (this.games[gameUuid].status = GameStatusEnum.Reset),
+        3000,
+      );
+    }
   }
 }
