@@ -56,6 +56,14 @@ export class GameController {
     return this.gameService.updateDisplayMode(gameUuid, userUuid);
   }
 
+  @Post(':gameUuid/convert-to-admin/:userUuid')
+  convertToAdmin(
+    @Param('gameUuid', ParseUUIDPipe) gameUuid: string,
+    @Param('userUuid', ParseUUIDPipe) userUuid: string,
+  ) {
+    return this.gameService.convertToAdmin(gameUuid, userUuid);
+  }
+
   @Put(':gameUuid/users/:userUuid')
   updateMeCardSelected(
     @Param('gameUuid', ParseUUIDPipe) gameUuid: string,
