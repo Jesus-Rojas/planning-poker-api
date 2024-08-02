@@ -38,6 +38,16 @@ export class GameController {
     return this.gameService.getUser(gameUuid, userUuid);
   }
 
+  @Post(':gameUuid/reveal-cards')
+  revealCards(@Param('gameUuid', ParseUUIDPipe) gameUuid: string) {
+    return this.gameService.revealCards(gameUuid);
+  }
+
+  @Post(':gameUuid/reset')
+  resetGame(@Param('gameUuid', ParseUUIDPipe) gameUuid: string) {
+    return this.gameService.resetGame(gameUuid);
+  }
+
   @Put(':gameUuid/users/:userUuid')
   updateMeCardSelected(
     @Param('gameUuid', ParseUUIDPipe) gameUuid: string,

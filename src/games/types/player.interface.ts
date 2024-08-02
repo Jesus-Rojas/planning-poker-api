@@ -7,6 +7,6 @@ export interface Player {
   role: RoleEnum;
   displayMode: DisplayModeEnum;
   score: number;
-  cardSelected?: string;
+  cardSelected: string | undefined;
   isActive: boolean;
 }

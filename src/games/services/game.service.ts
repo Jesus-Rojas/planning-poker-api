@@ -7,6 +7,7 @@ import { ResponseCreateGame } from '../types/response-create-game.interface';
 import { RoleEnum } from '../types/role.enum';
 import { DisplayModeEnum } from '../types/display-mode.enum';
 import { GameStatusEnum } from '../types/game-status.enum';
+import { ScoreCard } from '../types/score-card.interface';
 
 @Injectable()
 export class GameService {
@@ -17,6 +18,8 @@ export class GameService {
   createGame(gameName: string): ResponseCreateGame {
     const gameUuid = uuidv4();
     this.games[gameUuid] = {
+      average: 0,
+      scoreCards: [],
       name: gameName,
       users: [],
       status: GameStatusEnum.Reveal,
@@ -40,6 +43,7 @@ export class GameService {
       role,
       isActive: true,
       displayMode,
+      cardSelected: undefined,
     });
     this.games[gameUuid].users[userUuid] = { name: userName, score: 0 };
     this.eventEmitter.emit(GameEvents.JOIN, { gameUuid, userUuid, userName });
@@ -87,5 +91,57 @@ export class GameService {
         3000,
       );
     }
+  }
+
+  revealCards(gameUuid: string) {
+    this.getGame(gameUuid);
+    this.games[gameUuid].status = GameStatusEnum.Loading;
+    const users = this.games[gameUuid].users;
+    const cards: ScoreCard[] = users
+      .filter((user) => typeof user.cardSelected === 'string')
+      .reduce<ScoreCard[]>((cards, { cardSelected }) => {
+        const card = cards.find((card) => card.id === cardSelected);
+        if (!card) {
+          return [
+            ...cards,
+            {
+              id: cardSelected,
+              text: cardSelected,
+              amount: 1,
+            },
+          ];
+        }
+
+        return [
+          ...cards.filter((card) => card.id !== cardSelected),
+          {
+            id: cardSelected,
+            text: cardSelected,
+            amount: card.amount + 1,
+          },
+        ];
+      }, [] as ScoreCard[]);
+
+    let totalVotes = 0;
+    let weightedSum = 0;
+    const cardsFiltered = cards.filter((card) => !isNaN(Number(card.text)));
+    cardsFiltered.forEach(({ amount, text }) => {
+      totalVotes += amount;
+      weightedSum += Number(text) * amount;
+    });
+    const average = weightedSum / totalVotes;
+    this.games[gameUuid].status = GameStatusEnum.Reset;
+    this.games[gameUuid].average = average;
+    this.games[gameUuid].scoreCards = cards;
+    return { average, scoreCards: cards };
+  }
+
+  resetGame(gameUuid: string) {
+    this.getGame(gameUuid);
+    this.games[gameUuid].status = GameStatusEnum.Reveal;
+    this.games[gameUuid].users = this.games[gameUuid].users.map((user) => ({
+      ...user,
+      cardSelected: undefined,
+    }));
   }
 }
