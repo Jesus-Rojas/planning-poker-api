@@ -48,6 +48,14 @@ export class GameController {
     return this.gameService.resetGame(gameUuid);
   }
 
+  @Post(':gameUuid/update-display-mode/:userUuid')
+  updateDisplayMode(
+    @Param('gameUuid', ParseUUIDPipe) gameUuid: string,
+    @Param('userUuid', ParseUUIDPipe) userUuid: string,
+  ) {
+    return this.gameService.updateDisplayMode(gameUuid, userUuid);
+  }
+
   @Put(':gameUuid/users/:userUuid')
   updateMeCardSelected(
     @Param('gameUuid', ParseUUIDPipe) gameUuid: string,

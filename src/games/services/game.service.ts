@@ -144,4 +144,17 @@ export class GameService {
       cardSelected: undefined,
     }));
   }
+
+  updateDisplayMode(gameUuid: string, userUuid: string) {
+    this.getGame(gameUuid);
+    this.games[gameUuid].users = this.games[gameUuid].users.map((user) => {
+      if (user.uuid === userUuid) {
+        user.displayMode =
+          user.displayMode === DisplayModeEnum.Player
+            ? DisplayModeEnum.Spectator
+            : DisplayModeEnum.Player;
+      }
+      return user;
+    });
+  }
 }
